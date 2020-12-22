@@ -36,7 +36,7 @@
 	70000 - 79999: Recommended for user customized exit codes in AppDeployToolkitExtensions.ps1
 .LINK
 	http://psappdeploytoolkit.com
-	thats it
+	
 #>
 [CmdletBinding()]
 Param (
