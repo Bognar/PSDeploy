@@ -180,7 +180,7 @@ Try {
 		}
 
 		# <Perform Uninstallation tasks here>
-
+		Execute-Process -Path "$dirFiles\advisorinstaller.exe"
 
 		##*===============================================
 		##* POST-UNINSTALLATION
