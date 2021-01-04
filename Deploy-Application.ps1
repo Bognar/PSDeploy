@@ -183,9 +183,9 @@ Try {
 
 		# Determine uninstall string for Filezilla and commence uninstall
 		Write-Log -Message "Checking for an installed version of $appName" -Source 'Write-Log'
-		$uninstallString = ((Get-InstalledApplication -Name "cpu-z").UninstallString).Trim('"')
+		$uninstallString = ((Get-InstalledApplication -Name "CPU-Z").UninstallString).Trim('"')
 		if ($uninstallString) {
-			$installedVersion = (Get-InstalledApplication -Name "cpu-z").DisplayVersion
+			$installedVersion = (Get-InstalledApplication -Name "CPU-Z").DisplayVersion
 			Write-Log -Message "$appName $installedVersion will be uninstalled" -Source 'Write-Log'
 			Execute-Process -Path "$uninstallString" -Parameters '/S'
 		}
