@@ -139,7 +139,7 @@ Try {
 
 		## <Perform Installation tasks here>
 		
-	  Execute-Process -Path "$dirFiles\advisorinstaller.exe"
+	  	Execute-Process -Path '$dirFiles\cpu-z_1.94.exe' -Parameters '/quiet'
 		
 
 		##*===============================================
@@ -180,7 +180,7 @@ Try {
 		}
 
 		# <Perform Uninstallation tasks here>
-		Execute-Process -Path "$dirFiles\advisorinstaller.exe"
+		Execute-Process -Path '$dirFiles\cpu-z_1.94.exe'
 
 		##*===============================================
 		##* POST-UNINSTALLATION
