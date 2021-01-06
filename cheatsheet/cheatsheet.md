@@ -25,13 +25,13 @@ cd "$path_to_PSADT_folder_youre_working_from"
 ## *** Examples of exe install***
 Execute-Process -Path '<application>.exe' -Parameters '/quiet' -WaitForMsiExec:$true
 Execute-Process -Path "$dirFiles\DirectX\DXSetup.exe" -Parameters '/silent' -WindowStyle 'Hidden'
-#open notepad, don't wait for it to close before proceeding (i.e. continue with script)
+# open notepad, don't wait for it to close before proceeding (i.e. continue with script)
 Execute-Process -Path "$envSystemRoot\notepad.exe" -NoWait 
-#Execute an .exe, and hide confidential parameters from log file
+## Execute an .exe, and hide confidential parameters from log file
 $serialisation_params = '-batchmode -quit -serial <aa-bb-cc-dd-ee-ffff11111> -username "<serialisation username>" -password "SuperSecret123"'
 Execute-Process -Path "$envProgramFiles\Application\Serialise.exe" -Parameters "$serialisation_params" -SecureParameters:$True
 
-##***Example to install an msi***
+## ***Example to install an msi***
 Execute-MSI -Action 'Install' -Path "$dirFiles\<application>.msi" -Parameters 'REBOOT=ReallySuppress /QN'
 Execute-MSI -Action 'Install' -Path 'Discovery 2015.1.msi'
 #MSI install + transform file
@@ -60,17 +60,17 @@ Execute-Process -Path "cscript.exe" -Parameters "$dirFiles\whatever.vbs"
 
 
 ## Copy a file to the correct relative location for all user accounts
-#grabbed from here: http://psappdeploytoolkit.com/forums/topic/copy-file-to-all-users-currently-logged-in-and-for-all-future-users/
+# grabbed from here: http://psappdeploytoolkit.com/forums/topic/copy-file-to-all-users-currently-logged-in-and-for-all-future-users/
 $ProfilePaths = Get-UserProfiles | Select-Object -ExpandProperty 'ProfilePath'
 ForEach ($Profile in $ProfilePaths) {
     Copy-File -Path "$dirFiles\Example\example.ini" -Destination "$Profile\Example\To\Path\"
 }
 
 ##***Remove registry key***
-#I dont know the right term, but these are to delete the whole 'folder' reg key
+# I dont know the right term, but these are to delete the whole 'folder' reg key
 Remove-RegistryKey -Key 'HKEY_LOCAL_MACHINE\SOFTWARE\Macromedia\FlashPlayer\SafeVersions' -Recurse
 Remove-RegistryKey -Key 'HKLM:SOFTWARE\Macromedia\FlashPlayer\SafeVersions' -Recurse
-#This is to remove a specific reg key item from within a 'folder'
+# This is to remove a specific reg key item from within a 'folder'
 Remove-RegistryKey -Key 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name 'RunAppInstall'
 Remove-RegistryKey -Key 'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name 'RunAppInstall'
 
@@ -85,7 +85,7 @@ Set-RegistryKey -Key 'HKEY_LOCAL_MACHINE\SOFTWARE\LMKR\Licensing' -Name 'LMKR_LI
 }
 Invoke-HKCURegistrySettingsForAllUsers -RegistrySettings $HKCURegistrySettings
 
-#import a .reg key, useful if there's a butt-tonne of nested keys/etc
+# import a .reg key, useful if there's a butt-tonne of nested keys/etc
 Execute-Process -FilePath "reg.exe" -Parameters "IMPORT `"$dirFiles\name-of-reg-export.reg`"" -PassThru
 
 ## To pause script for <x> time
@@ -120,14 +120,14 @@ Remove-File -Path "$envCommonDesktop\GeoGraphix Seismic Modeling.lnk"
 "$envSystemRoot\Example4" <# Careful with the last item to not include a comma after the double quote #>``
 | % { Remove-Folder -Path "$_" }
 
-## Remove a bunch of specific folders, only if they're empty
-<# Use this by specifying folders from "deepest folder level" to "most shallow folder level" order e.g.
+# Remove a bunch of specific folders, only if they're empty
+# Use this by specifying folders from "deepest folder level" to "most shallow folder level" order e.g.
 c:\program files\vendor\app\v12\junk - then 
 c:\program files\vendor\app\v12 - then
 c:\program files\vendor\app - then
 c:\program files\vendor
-using the above example, it will only remove c:\program files\vendor if every other folder above is completely empty. 
-if for example v11 was also installed, it would stop prior #>
+# using the above example, it will only remove c:\program files\vendor if every other folder above is completely empty. 
+# if for example v11 was also installed, it would stop prior 
 (
     "$envProgramFiles\vendor\app\v12\junk",
     "$envProgramFiles\vendor\app\v12",
@@ -136,7 +136,7 @@ if for example v11 was also installed, it would stop prior #>
     "$envProgramFilesX86\vendor\app\v12\junk",
     "$envProgramFilesX86\vendor\app\v12",
     "$envProgramFilesX86\vendor\app",
-    "$envProgramFilesX86\vendor" <# careful not to include the comma after the double quotes in this one #>
+    "$envProgramFilesX86\vendor" # careful not to include the comma after the double quotes in this one
 ) | % { if (!(Test-Path -Path "$_\*")) { Remove-Folder -Path "$_" } }
     # for each piped item, if the folder specified DOES NOT have contents ($folder\*), remove the folder 
 
@@ -163,13 +163,13 @@ While(!(test-path -path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVer
                 sleep 5;
                 Write-Log -Message "$appVendor - $appName - $appVersion is still not finished installing, sleeping another 5" -Source $deployAppScriptFriendlyName;
 }
-#pause until example file
+# pause until example file
 While(!(test-path -path "$envCommonDesktop\Example Shortcut.lnk")) {
                 sleep 5;
                 Write-Log -Message "$appVendor - $appName - $appVersion is still not finished installing, sleeping another 5" -Source $deployAppScriptFriendlyName;
 }
 
-##***To Create a shortcut***
+## ***To Create a shortcut***
 New-Shortcut -Path "$envCommonPrograms\My Shortcut.lnk" `
     -TargetPath "$envWinDir\system32\notepad.exe" `
     -Arguments "--example-argument --example-argument-two" `
@@ -177,13 +177,13 @@ New-Shortcut -Path "$envCommonPrograms\My Shortcut.lnk" `
     -WorkingDirectory "$envHomeDrive\$envHomePath"
 
 ## Modify ACL on a file
-#first load the ACL
+# first load the ACL
 $acl_to_modify = "$envProgramData\Example\File.txt"
 $acl = Get-Acl "$acl_to_modify"
-#add another entry to the ACL list (in this case, add all users to have full control)
+# add another entry to the ACL list (in this case, add all users to have full control)
 $ar = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\Users", "FullControl", "None", "None", "Allow")
 $acl.SetAccessRule($ar)
-#re-write the acl on the target file
+# re-write the acl on the target file
 Set-Acl "$acl_to_modify" $acl
 
 ## Modify ACL on a folder
@@ -196,15 +196,15 @@ Set-Acl "$folder_to_change" $acl
 ## Add to environment variables (specifically PATH in this case)
 # The first input in the .NET code can have Path subtituted for any other environemnt variable name (gci env: to see what is presently set)
 $path_addition = "C:\bin"
-#add $path_addition to permanent system wide path
+# add $path_addition to permanent system wide path
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";" + $path_addition, "Machine")
-#add $path_addition to permanent user specific path
+# add $path_addition to permanent user specific path
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";" + $path_addition, "User")
-#add $path_addition to the process level path only (i.e. when you quit script, it will no longer be applied)
+# add $path_addition to the process level path only (i.e. when you quit script, it will no longer be applied)
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";" + $path_addition, "Process")
 
 
-#.NET 4.x comparison/install
+# .NET 4.x comparison/install
 $version_we_require = [version]"4.5.2"
 $version_we_want_path = "$dirFiles\NDP452-KB2901907-x86-x64-AllOS-ENU.exe"
 $install_params = "/q /norestart"
@@ -213,13 +213,13 @@ if((Get-RegistryKey "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" -
     Execute-Process -Path "$version_we_want_path" -Parameters "$install_params" -WaitForMSIExec:$true
 }
 
-#exit codes for reboot required
-#soft reboot <- will not 'force' restart, and sccm will progress past, but will nag to restart afterward
+# exit codes for reboot required
+# soft reboot <- will not 'force' restart, and sccm will progress past, but will nag to restart afterward
 Exit-Script -ExitCode 3010
-#hard reboot <- does not 'force' restart, but sccm won't proceed past any pre-reqs without reboot
+# hard reboot <- does not 'force' restart, but sccm won't proceed past any pre-reqs without reboot
 Exit-Script -ExitCode 1641
 
-##Create Active Setup to run once per user, and run an arbitrary executable as the user
+## Create Active Setup to run once per user, and run an arbitrary executable as the user
 # *WARNING* this really isn't a recommended method for a number of reasons.
 # 1. You must logoff a logged in user for them to run this
 # 2. Activesetup is not syncronous and will hold up the user login process until the command completes
