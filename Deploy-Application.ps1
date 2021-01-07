@@ -36,21 +36,20 @@
 	70000 - 79999: Recommended for user customized exit codes in AppDeployToolkitExtensions.ps1
 .LINK
 	http://psappdeploytoolkit.com
-	
 #>
 [CmdletBinding()]
 Param (
-	[Parameter(Mandatory=$false)]
-	[ValidateSet('Install','Uninstall','Repair')]
+	[Parameter(Mandatory = $false)]
+	[ValidateSet('Install', 'Uninstall')]
 	[string]$DeploymentType = 'Install',
-	[Parameter(Mandatory=$false)]
-	[ValidateSet('Interactive','Silent','NonInteractive')]
+	[Parameter(Mandatory = $false)]
+	[ValidateSet('Interactive', 'Silent', 'NonInteractive')]
 	[string]$DeployMode = 'Interactive',
-	[Parameter(Mandatory=$false)]
+	[Parameter(Mandatory = $false)]
 	[switch]$AllowRebootPassThru = $false,
-	[Parameter(Mandatory=$false)]
+	[Parameter(Mandatory = $false)]
 	[switch]$TerminalServerMode = $false,
-	[Parameter(Mandatory=$false)]
+	[Parameter(Mandatory = $false)]
 	[switch]$DisableLogging = $false
 )
 
@@ -62,19 +61,19 @@ Try {
 	##* VARIABLE DECLARATION
 	##*===============================================
 	## Variables: Application
-	[string]$appVendor = 'Josip Bognar'
-	[string]$appName = 'Some kind of Advisor'
-	[string]$appVersion = '1.0'
-	[string]$appArch = '64bit'
+	[string]$appVendor = ''
+	[string]$appName = 'CPU-Z Client'
+	[string]$appVersion = '1.94'
+	[string]$appArch = ''
 	[string]$appLang = 'EN'
 	[string]$appRevision = '01'
 	[string]$appScriptVersion = '1.0.0'
-	[string]$appScriptDate = 'XX/XX/20XX'
-	[string]$appScriptAuthor = '<author name>'
+	[string]$appScriptDate = '04/01/2021'
+	[string]$appScriptAuthor = 'Josip Bognar'
 	##*===============================================
 	## Variables: Install Titles (Only set here to override defaults set by the toolkit)
-	[string]$installName = 'Advisor JB'
-	[string]$installTitle = 'AdvisorJB'
+	[string]$installName = "CPU-Z Client"
+	[string]$installTitle = ''
 
 	##* Do not modify section below
 	#region DoNotModify
@@ -84,8 +83,8 @@ Try {
 
 	## Variables: Script
 	[string]$deployAppScriptFriendlyName = 'Deploy Application'
-	[version]$deployAppScriptVersion = [version]'3.8.3'
-	[string]$deployAppScriptDate = '30/09/2020'
+	[version]$deployAppScriptVersion = [version]'3.7.0'
+	[string]$deployAppScriptDate = '02/13/2018'
 	[hashtable]$deployAppScriptParameters = $psBoundParameters
 
 	## Variables: Environment
@@ -99,7 +98,7 @@ Try {
 		If ($DisableLogging) { . $moduleAppDeployToolkitMain -DisableLogging } Else { . $moduleAppDeployToolkitMain }
 	}
 	Catch {
-		If ($mainExitCode -eq 0){ [int32]$mainExitCode = 60008 }
+		If ($mainExitCode -eq 0) { [int32]$mainExitCode = 60008 }
 		Write-Error -Message "Module [$moduleAppDeployToolkitMain] failed to load: `n$($_.Exception.Message)`n `n$($_.InvocationInfo.PositionMessage)" -ErrorAction 'Continue'
 		## Exit the script, returning the exit code to SCCM
 		If (Test-Path -LiteralPath 'variable:HostInvocation') { $script:ExitCode = $mainExitCode; Exit } Else { Exit $mainExitCode }
@@ -111,7 +110,7 @@ Try {
 	##* END VARIABLE DECLARATION
 	##*===============================================
 
-	If ($deploymentType -ine 'Uninstall' -and $deploymentType -ine 'Repair') {
+	If ($deploymentType -ine 'Uninstall') {
 		##*===============================================
 		##* PRE-INSTALLATION
 		##*===============================================
@@ -133,13 +132,15 @@ Try {
 
 		## Handle Zero-Config MSI Installations
 		If ($useDefaultMsi) {
-			[hashtable]$ExecuteDefaultMSISplat =  @{ Action = 'Install'; Path = $defaultMsiFile }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
+			[hashtable]$ExecuteDefaultMSISplat = @{ Action = 'Install'; Path = $defaultMsiFile }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
 			Execute-MSI @ExecuteDefaultMSISplat; If ($defaultMspFiles) { $defaultMspFiles | ForEach-Object { Execute-MSI -Action 'Patch' -Path $_ } }
-			{
+		}
 
 		## <Perform Installation tasks here>
+
+		#Determine OS architecture and execute the relevant installer
 		
-	  Execute-Process -Path "$dirFiles\advisorinstaller.exe"
+			Execute-Process -Path "$dirFiles\cpu-z_1.94.exe" 
 		
 
 		##*===============================================
@@ -150,10 +151,9 @@ Try {
 		## <Perform Post-Installation tasks here>
 
 		## Display a message at the end of the install
-		If (-not $useDefaultMsi) { Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait }
+		If (-not $useDefaultMsi) { Show-InstallationPrompt -Message "The installation of $appName $appVersion is complete." -ButtonRightText 'OK' -Icon Information -NoWait }
 	}
-	ElseIf ($deploymentType -ieq 'Uninstall')
-	{
+	ElseIf ($deploymentType -ieq 'Uninstall') {
 		##*===============================================
 		##* PRE-UNINSTALLATION
 		##*===============================================
@@ -175,13 +175,23 @@ Try {
 
 		## Handle Zero-Config MSI Uninstallations
 		If ($useDefaultMsi) {
-			[hashtable]$ExecuteDefaultMSISplat =  @{ Action = 'Uninstall'; Path = $defaultMsiFile }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
+			[hashtable]$ExecuteDefaultMSISplat = @{ Action = 'Uninstall'; Path = $defaultMsiFile }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
 			Execute-MSI @ExecuteDefaultMSISplat
 		}
 
 		# <Perform Uninstallation tasks here>
-		Execute-Process -Path "$dirFiles\advisorinstaller.exe"
 
+		# Determine uninstall string for Filezilla and commence uninstall
+		Write-Log -Message "Checking for an installed version of $appName" -Source 'Write-Log'
+		$uninstallString = ((Get-InstalledApplication -Name "CPU-Z").UninstallString).Trim('"')
+		if ($uninstallString) {
+			$installedVersion = (Get-InstalledApplication -Name "CPU-Z").DisplayVersion
+			Write-Log -Message "$appName $installedVersion will be uninstalled" -Source 'Write-Log'
+			Execute-Process -Path "$uninstallString" -Parameters '/S'
+		}
+		else {
+			Write-Log -Message "$appName is not installed on this device." -Source 'Write-Log'
+		}
 		##*===============================================
 		##* POST-UNINSTALLATION
 		##*===============================================
@@ -191,39 +201,7 @@ Try {
 
 
 	}
-	ElseIf ($deploymentType -ieq 'Repair')
-	{
-		##*===============================================
-		##* PRE-REPAIR
-		##*===============================================
-		[string]$installPhase = 'Pre-Repair'
 
-		## Show Progress Message (with the default message)
-		Show-InstallationProgress
-
-		## <Perform Pre-Repair tasks here>
-
-		##*===============================================
-		##* REPAIR
-		##*===============================================
-		[string]$installPhase = 'Repair'
-
-		## Handle Zero-Config MSI Repairs
-		If ($useDefaultMsi) {
-			[hashtable]$ExecuteDefaultMSISplat =  @{ Action = 'Repair'; Path = $defaultMsiFile; }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
-			Execute-MSI @ExecuteDefaultMSISplat
-		}
-		# <Perform Repair tasks here>
-
-		##*===============================================
-		##* POST-REPAIR
-		##*===============================================
-		[string]$installPhase = 'Post-Repair'
-
-		## <Perform Post-Repair tasks here>
-
-
-    }
 	##*===============================================
 	##* END SCRIPT BODY
 	##*===============================================
